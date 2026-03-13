@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ninja Co-Pilot — Video Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #D62B31;
+  --orange: #FF6B35;
+  --navy: #0F0F1A;
+  --card: #16213E;
+  --panel: #1A1A2E;
+  --green: #00C896;
+  --blue: #4FC3F7;
+  --yellow: #FFD166;
+  --white: #FFFFFF;
+  --muted: #8892B0;
+  --light: #CCD6F6;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:#000;
+  font-family:'Nunito',sans-serif;
+  overflow:hidden;
+  width:100vw; height:100vh;
+  display:flex; flex-direction:column;
+}
+
+/* ── Stage ── */
+#stage {
+  flex:1;
+  position:relative;
+  overflow:hidden;
+  background:var(--navy);
+}
+
+.slide {
+  position:absolute; inset:0;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.6s ease;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.slide.active { opacity:1; pointer-events:all; }
+
+/* ── Top bar ── */
+.topbar {
+  height:48px;
+  background:var(--panel);
+  border-bottom:3px solid var(--red);
+  display:flex; align-items:center;
+  padding:0 28px; gap:10px;
+  flex-shrink:0;
+}
+.topbar .dot { width:10px;height:10px;border-radius:50%;background:var(--red); }
+.topbar .tag { font-size:10px;letter-spacing:3px;font-weight:800;color:var(--muted);text-transform:uppercase; font-family:'Nunito',sans-serif; }
+
+/* ── Slide body ── */
+.sbody {
+  flex:1; display:flex; gap:0;
+  overflow:hidden;
+  padding-bottom:0;
+}
+
+/* ── Controls ── */
+#controls {
+  height:64px;
+  background:rgba(5,5,15,0.97);
+  border-top:1px solid rgba(255,255,255,0.07);
+  display:flex; align-items:center;
+  padding:0 20px; gap:12px;
+  flex-shrink:0;
+  z-index:100;
+}
+.ctrl-btn {
+  background:var(--card);
+  border:1px solid rgba(255,255,255,0.12);
+  color:var(--white);
+  padding:8px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:13px;
+  font-family:'Nunito',sans-serif;
+  font-weight:700;
+  transition:all 0.2s;
+  white-space:nowrap;
+}
+.ctrl-btn:hover { background:var(--red); border-color:var(--red); }
+.ctrl-btn.primary { background:var(--red); border-color:var(--red); }
+.ctrl-btn.speaking { background:var(--green); border-color:var(--green); color:#000; animation:pulsebtn 1s infinite; }
+@keyframes pulsebtn { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+#progress-wrap { flex:1; display:flex; align-items:center; gap:10px; }
+#progress-bar {
+  flex:1; height:6px;
+  background:rgba(255,255,255,0.1);
+  border-radius:3px; cursor:pointer;
+}
+#progress-fill { height:100%; background:var(--red); border-radius:3px; width:0%; transition:width 0.4s; }
+#slide-num { font-size:12px; color:var(--muted); white-space:nowrap; font-weight:700; }
+#timer { font-size:12px; color:var(--muted); font-family:'Nunito',sans-serif; font-weight:700; min-width:44px; text-align:right; }
+
+/* ── Subtitle bar ── */
+#subtitles {
+  position:fixed; bottom:64px; left:0; right:0;
+  background:rgba(0,0,0,0.85);
+  padding:10px 48px;
+  text-align:center;
+  font-size:clamp(13px,1.7vw,17px);
+  color:var(--white);
+  line-height:1.5;
+  min-height:50px;
+  display:flex; align-items:center; justify-content:center;
+  z-index:99;
+  font-weight:600;
+  border-top:1px solid rgba(255,255,255,0.05);
+  transition:opacity 0.3s;
+}
+#subtitles span { max-width:900px; display:block; }
+
+/* ── Speech indicator ── */
+#speech-wave {
+  display:none;
+  align-items:center; gap:3px;
+  margin-right:6px;
+}
+#speech-wave.active { display:flex; }
+#speech-wave span {
+  display:inline-block;
+  width:3px; height:14px;
+  background:var(--green);
+  border-radius:2px;
+  animation:wave 0.8s ease-in-out infinite;
+}
+#speech-wave span:nth-child(2){animation-delay:0.1s}
+#speech-wave span:nth-child(3){animation-delay:0.2s}
+#speech-wave span:nth-child(4){animation-delay:0.3s}
+#speech-wave span:nth-child(5){animation-delay:0.15s}
+@keyframes wave {
+  0%,100%{transform:scaleY(0.4)} 50%{transform:scaleY(1.4)}
+}
+
+/* ── Animations ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes pop { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+@keyframes wiggle { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(6deg)} }
+@keyframes blink { 0%,90%,100%{transform:scaleY(1)} 95%{transform:scaleY(0.1)} }
+@keyframes drive { from{transform:translateX(-120%)} to{transform:translateX(0)} }
+@keyframes scanBeam { 0%{top:10%} 100%{top:85%} }
+@keyframes drawLine { from{stroke-dashoffset:1000} to{stroke-dashoffset:0} }
+@keyframes rain { from{transform:translateY(-20px);opacity:0} to{transform:translateY(60px);opacity:0.6} }
+@keyframes celebrate { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(-80px) rotate(360deg);opacity:0} }
+
+/* ── Text helpers ── */
+.slide-h1 { font-family:'Fredoka One',sans-serif; font-size:clamp(28px,4vw,48px); color:var(--white); line-height:1.1; }
+.slide-h2 { font-family:'Fredoka One',sans-serif; font-size:clamp(20px,2.8vw,32px); color:var(--white); line-height:1.2; }
+.slide-sub { font-size:clamp(13px,1.6vw,16px); color:var(--orange); font-weight:700; font-style:italic; margin-top:4px; }
+.slide-p { font-size:clamp(12px,1.4vw,15px); color:var(--light); line-height:1.6; font-weight:600; }
+
+/* ── Cards ── */
+.card { background:var(--card); border-radius:14px; padding:18px; border:2px solid rgba(255,255,255,0.06); }
+.card.red { border-top:4px solid var(--red); }
+.card.green { border-top:4px solid var(--green); }
+.card.orange { border-top:4px solid var(--orange); }
+.card.blue { border-top:4px solid var(--blue); }
+
+/* ── Feature pills ── */
+.pill { background:var(--red); color:var(--white); padding:7px 16px; border-radius:30px; font-size:13px; font-weight:800; display:inline-flex; align-items:center; gap:6px; }
+
+/* ── Stat ── */
+.stat-big { font-family:'Fredoka One',sans-serif; font-size:clamp(48px,8vw,88px); line-height:1; }
+
+/* ── Bottom bar ── */
+.btmbar { background:var(--red); padding:10px 32px; display:flex; gap:16px; justify-content:center; align-items:center; font-size:13px; font-weight:800; color:var(--white); flex-shrink:0; flex-wrap:wrap; }
+
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 1 — TITLE
+═══════════════════════════════════════════════════════════ -->
+<div class="slide active" id="s0">
+  <div class="sbody" style="flex-direction:row;">
+    <!-- Left red panel -->
+    <div style="width:42%;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;position:relative;overflow:hidden;">
+      <div style="position:absolute;right:0;top:0;bottom:0;width:14px;background:var(--orange);"></div>
+      <!-- Cartoon Ninja Van truck SVG -->
+      <svg viewBox="0 0 260 160" width="88%" style="animation:drive 1s ease both;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.5))">
+        <!-- Road -->
+        <rect x="0" y="130" width="260" height="20" rx="4" fill="#1a1a2e"/>
+        <rect x="10" y="138" width="30" height="6" rx="3" fill="#ffffff33"/>
+        <rect x="80" y="138" width="30" height="6" rx="3" fill="#ffffff33"/>
+        <rect x="150" y="138" width="30" height="6" rx="3" fill="#ffffff33"/>
+        <rect x="220" y="138" width="30" height="6" rx="3" fill="#ffffff33"/>
+        <!-- Truck body -->
+        <rect x="20" y="55" width="180" height="78" rx="10" fill="#ffffff"/>
+        <rect x="20" y="55" width="180" height="12" rx="6" fill="#D62B31"/>
+        <!-- Cab -->
+        <rect x="158" y="30" width="62" height="55" rx="10" fill="#ffffff"/>
+        <rect x="158" y="30" width="62" height="12" rx="6" fill="#D62B31"/>
+        <!-- Windshield -->
+        <rect x="163" y="44" width="50" height="26" rx="6" fill="#4FC3F7" opacity="0.9"/>
+        <!-- Ninja driver -->
+        <circle cx="185" cy="44" r="12" fill="#FFD166"/>
+        <rect x="175" y="44" width="20" height="8" rx="4" fill="#1a1a2e"/>
+        <!-- Eyes peeking over mask -->
+        <circle cx="181" cy="43" r="2.5" fill="white"/><circle cx="181" cy="43" r="1.5" fill="#333"/>
+        <circle cx="189" cy="43" r="2.5" fill="white"/><circle cx="189" cy="43" r="1.5" fill="#333"/>
+        <!-- Ninja headband -->
+        <rect x="175" y="34" width="20" height="5" rx="2" fill="#D62B31"/>
+        <!-- NINJA VAN text -->
+        <rect x="30" y="76" width="130" height="36" rx="6" fill="#D62B31"/>
+        <text x="95" y="100" font-family="Fredoka One,sans-serif" font-size="18" fill="white" text-anchor="middle">NINJA VAN</text>
+        <!-- Wheels -->
+        <circle cx="60" cy="133" r="18" fill="#333"/><circle cx="60" cy="133" r="11" fill="#666"/><circle cx="60" cy="133" r="5" fill="#999"/>
+        <circle cx="185" cy="133" r="18" fill="#333"/><circle cx="185" cy="133" r="11" fill="#666"/><circle cx="185" cy="133" r="5" fill="#999"/>
+        <!-- Speed lines -->
+        <line x1="0" y1="70" x2="18" y2="70" stroke="white" stroke-width="3" opacity="0.5" stroke-linecap="round"/>
+        <line x1="0" y1="82" x2="14" y2="82" stroke="white" stroke-width="2" opacity="0.4" stroke-linecap="round"/>
+        <line x1="0" y1="94" x2="10" y2="94" stroke="white" stroke-width="2" opacity="0.3" stroke-linecap="round"/>
+        <!-- Stars -->
+        <text x="235" y="50" font-size="18" fill="#FFD166" style="animation:wiggle 1s infinite">⭐</text>
+        <text x="5" y="45" font-size="14" fill="#FFD16688">✨</text>
+      </svg>
+      <div style="font-family:'Fredoka One',sans-serif;font-size:13px;letter-spacing:5px;color:rgba(255,255,255,0.9);margin-top:16px;">CAPSTONE 2025</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;">
+        <span style="background:rgba(255,255,255,0.18);padding:4px 10px;border-radius:20px;font-size:10px;color:#fff;font-weight:800;">AI</span>
+        <span style="background:rgba(255,255,255,0.18);padding:4px 10px;border-radius:20px;font-size:10px;color:#fff;font-weight:800;">Voice</span>
+        <span style="background:rgba(255,255,255,0.18);padding:4px 10px;border-radius:20px;font-size:10px;color:#fff;font-weight:800;">OCR</span>
+        <span style="background:rgba(255,255,255,0.18);padding:4px 10px;border-radius:20px;font-size:10px;color:#fff;font-weight:800;">Cloud</span>
+      </div>
+    </div>
+    <!-- Right dark panel -->
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 48px 80px;gap:14px;">
+      <div style="font-family:'Fredoka One',sans-serif;font-size:clamp(36px,5.5vw,64px);color:var(--white);line-height:1;animation:fadeUp 0.7s ease both;">Ninja Co-Pilot</div>
+      <div class="slide-sub" style="font-size:clamp(16px,2.2vw,22px);animation:fadeUp 0.7s 0.15s ease both;">AI Senior Driver Copilot 🚀</div>
+      <div class="slide-p" style="max-width:440px;animation:fadeUp 0.7s 0.3s ease both;">Transforming last-mile delivery in Singapore with <strong style="color:var(--yellow);">Generative AI</strong>, <strong style="color:var(--green);">Computer Vision</strong> &amp; <strong style="color:var(--blue);">Voice AI</strong>.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;animation:fadeUp 0.7s 0.45s ease both;">
+        <span class="pill">🎙 Voice AI</span>
+        <span class="pill">📦 Parcel OCR</span>
+        <span class="pill">🗺 Navigation</span>
+        <span class="pill">🤖 Claude AI</span>
+      </div>
+      <div class="slide-p" style="animation:fadeUp 0.7s 0.6s ease both;opacity:0.7;">🚀 &nbsp;Deployed on Google Cloud Run &nbsp;·&nbsp; CI/CD via GitHub Actions</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 2 — CHALLENGE
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s1">
+  <div class="topbar"><div class="dot"></div><div class="tag">The Challenge</div></div>
+  <div class="sbody" style="flex-direction:column;padding:20px 32px 80px;">
+    <div style="display:flex;gap:24px;align-items:flex-start;">
+      <!-- Cartoon frustrated driver SVG -->
+      <svg viewBox="0 0 200 200" width="200" style="flex-shrink:0;animation:pop 0.6s ease both;">
+        <!-- Background circle -->
+        <circle cx="100" cy="100" r="90" fill="var(--card)"/>
+        <!-- Warning signs floating -->
+        <text x="28" y="50" font-size="22" style="animation:wiggle 1.5s infinite">⚠️</text>
+        <text x="148" y="42" font-size="18" style="animation:wiggle 1.5s 0.3s infinite">❓</text>
+        <text x="155" y="155" font-size="20" style="animation:wiggle 1.5s 0.6s infinite">😤</text>
+        <!-- Driver body -->
+        <rect x="66" y="120" width="68" height="60" rx="12" fill="#FF6B35"/>
+        <!-- Ninja Van shirt -->
+        <rect x="72" y="130" width="56" height="25" rx="6" fill="#D62B31"/>
+        <text x="100" y="147" font-family="Fredoka One,sans-serif" font-size="9" fill="white" text-anchor="middle">NINJA VAN</text>
+        <!-- Head -->
+        <circle cx="100" cy="105" r="28" fill="#FFD166"/>
+        <!-- Angry eyebrows -->
+        <path d="M82 95 Q90 90 98 95" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M102 95 Q110 90 118 95" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- Squinting eyes -->
+        <ellipse cx="90" cy="103" rx="6" ry="4" fill="#333"/>
+        <ellipse cx="110" cy="103" rx="6" ry="4" fill="#333"/>
+        <!-- Frown -->
+        <path d="M88 118 Q100 112 112 118" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- Question marks around head -->
+        <text x="42" y="100" font-size="24" fill="#FFD166" opacity="0.8" style="animation:float 2s infinite">?</text>
+        <text x="148" y="105" font-size="24" fill="#FFD166" opacity="0.8" style="animation:float 2s 0.5s infinite">?</text>
+        <!-- Map crumpled in hand -->
+        <rect x="68" y="148" width="22" height="18" rx="3" fill="#fff" transform="rotate(-20 68 148)"/>
+        <line x1="72" y1="152" x2="85" y2="152" stroke="#ccc" stroke-width="1.5"/>
+        <line x1="72" y1="157" x2="82" y2="157" stroke="#ccc" stroke-width="1.5"/>
+      </svg>
+      <div style="flex:1;">
+        <div class="slide-h1" style="animation:fadeUp 0.5s ease both;">Last-Mile Delivery Is Hard</div>
+        <div class="slide-sub" style="animation:fadeUp 0.5s 0.1s ease both;">4 daily pain points with zero digital support</div>
+      </div>
+    </div>
+    <!-- 4 problem cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;flex:1;margin-top:16px;">
+      <div class="card red" style="animation:pop 0.5s 0.1s ease both;">
+        <div style="font-size:28px;margin-bottom:8px;">🗺️</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:15px;color:var(--orange);margin-bottom:6px;">Manual Navigation</div>
+        <div class="slide-p" style="font-size:12px;">Drivers hand-search HDB addresses. 30% of shift time wasted.</div>
+      </div>
+      <div class="card red" style="animation:pop 0.5s 0.2s ease both;">
+        <div style="font-size:28px;margin-bottom:8px;">🙅</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:15px;color:var(--orange);margin-bottom:6px;">No Hands-Free Help</div>
+        <div class="slide-p" style="font-size:12px;">Can't safely check instructions while driving. No voice AI exists.</div>
+      </div>
+      <div class="card red" style="animation:pop 0.5s 0.3s ease both;">
+        <div style="font-size:28px;margin-bottom:8px;">📋</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:15px;color:var(--orange);margin-bottom:6px;">Manual Scanning</div>
+        <div class="slide-p" style="font-size:12px;">Typing addresses from labels. 15% failed deliveries from typos.</div>
+      </div>
+      <div class="card red" style="animation:pop 0.5s 0.4s ease both;">
+        <div style="font-size:28px;margin-bottom:8px;">📵</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:15px;color:var(--orange);margin-bottom:6px;">Poor Comms</div>
+        <div class="slide-p" style="font-size:12px;">Inconsistent ETA updates. Customers left in the dark.</div>
+      </div>
+    </div>
+  </div>
+  <div class="btmbar">🚚 2M+ parcels/day in SG &nbsp;·&nbsp; ⏱ 30% time lost to navigation &nbsp;·&nbsp; 📦 15% failed deliveries</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 3 — SOLUTION
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="topbar"><div class="dot"></div><div class="tag">Our Solution</div></div>
+  <div class="sbody" style="gap:24px;padding:20px 32px 80px;align-items:flex-start;">
+    <!-- Left: text + features -->
+    <div style="flex:1;display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <div class="slide-h1" style="animation:fadeUp 0.5s ease both;">Meet Ninja Co-Pilot</div>
+        <div class="slide-sub" style="animation:fadeUp 0.5s 0.1s ease both;">Your AI companion for every delivery 🤝</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:12px;animation:fadeUp 0.5s 0.1s ease both;">
+          <div style="font-size:26px;width:40px;text-align:center;">🎙</div>
+          <div><div style="font-weight:800;color:var(--white);font-size:14px;">Voice AI</div><div style="font-size:11px;color:var(--muted);">Whisper STT hands-free</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:12px;animation:fadeUp 0.5s 0.2s ease both;">
+          <div style="font-size:26px;width:40px;text-align:center;">📦</div>
+          <div><div style="font-weight:800;color:var(--white);font-size:14px;">Parcel OCR</div><div style="font-size:11px;color:var(--muted);">GPT-4V label scan</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:12px;animation:fadeUp 0.5s 0.3s ease both;">
+          <div style="font-size:26px;width:40px;text-align:center;">🗺</div>
+          <div><div style="font-weight:800;color:var(--white);font-size:14px;">Navigation</div><div style="font-size:11px;color:var(--muted);">OneMap + OSRM</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:12px;animation:fadeUp 0.5s 0.4s ease both;">
+          <div style="font-size:26px;width:40px;text-align:center;">🌧</div>
+          <div><div style="font-weight:800;color:var(--white);font-size:14px;">Weather</div><div style="font-size:11px;color:var(--muted);">Real-time alerts</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:12px;animation:fadeUp 0.5s 0.5s ease both;">
+          <div style="font-size:26px;width:40px;text-align:center;">🔔</div>
+          <div><div style="font-weight:800;color:var(--white);font-size:14px;">Notifications</div><div style="font-size:11px;color:var(--muted);">Auto ETA to WhatsApp</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:12px;animation:fadeUp 0.5s 0.6s ease both;">
+          <div style="font-size:26px;width:40px;text-align:center;">🤖</div>
+          <div><div style="font-weight:800;color:var(--white);font-size:14px;">Claude AI</div><div style="font-size:11px;color:var(--muted);">Delivery guidance</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Right: cartoon phone -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:8px;">
+      <svg viewBox="0 0 160 290" width="160" style="animation:pop 0.7s 0.2s ease both;filter:drop-shadow(0 16px 40px rgba(0,0,0,0.6));">
+        <!-- Phone body -->
+        <rect x="5" y="5" width="150" height="280" rx="22" fill="#16213E"/>
+        <rect x="5" y="5" width="150" height="280" rx="22" fill="none" stroke="#D62B31" stroke-width="3"/>
+        <!-- Speaker pill -->
+        <rect x="52" y="16" width="56" height="8" rx="4" fill="#0f0f1a"/>
+        <!-- Screen -->
+        <rect x="12" y="32" width="136" height="246" rx="10" fill="#0f0f1a"/>
+        <!-- App header -->
+        <rect x="12" y="32" width="136" height="36" rx="10" fill="#D62B31"/>
+        <text x="80" y="55" font-family="Fredoka One,sans-serif" font-size="13" fill="white" text-anchor="middle">Ninja Co-Pilot</text>
+        <!-- Map area -->
+        <rect x="16" y="72" width="128" height="90" rx="6" fill="#1a2a1a"/>
+        <!-- Map grid lines -->
+        <line x1="16" y1="99" x2="144" y2="99" stroke="#ffffff18" stroke-width="1"/>
+        <line x1="16" y1="126" x2="144" y2="126" stroke="#ffffff18" stroke-width="1"/>
+        <line x1="60" y1="72" x2="60" y2="162" stroke="#ffffff18" stroke-width="1"/>
+        <line x1="100" y1="72" x2="100" y2="162" stroke="#ffffff18" stroke-width="1"/>
+        <!-- Route line -->
+        <path d="M30 150 Q60 130 80 108 Q100 90 125 82" stroke="#00C896" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="6 3" style="animation:drawLine 2s ease both;stroke-dashoffset:1000;"/>
+        <!-- Pin -->
+        <circle cx="125" cy="82" r="7" fill="#D62B31"/>
+        <circle cx="125" cy="82" r="3" fill="white"/>
+        <!-- Location label -->
+        <rect x="16" y="166" width="128" height="22" rx="5" fill="#16213E"/>
+        <text x="80" y="181" font-family="Nunito,sans-serif" font-weight="800" font-size="9" fill="#00C896" text-anchor="middle">📍 Block 123 Ang Mo Kio</text>
+        <!-- Voice btn -->
+        <rect x="18" y="194" width="124" height="32" rx="10" fill="#D62B31"/>
+        <text x="80" y="215" font-family="Fredoka One,sans-serif" font-size="13" fill="white" text-anchor="middle">🎙  Voice Command</text>
+        <!-- Scan btn -->
+        <rect x="18" y="232" width="124" height="32" rx="10" fill="none" stroke="#00C896" stroke-width="2"/>
+        <text x="80" y="253" font-family="Fredoka One,sans-serif" font-size="13" fill="#00C896" text-anchor="middle">📦  Scan Label</text>
+        <!-- Home indicator -->
+        <rect x="62" y="270" width="36" height="5" rx="3" fill="#ffffff44"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 4 — CLAUDE AI + VOICE
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="topbar"><div class="dot"></div><div class="tag">Feature 01 &amp; 02</div></div>
+  <div class="sbody" style="gap:20px;padding:20px 32px 80px;">
+    <!-- Left: Claude AI -->
+    <div style="flex:1;background:var(--panel);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <!-- Robot cartoon -->
+      <div style="display:flex;align-items:center;gap:14px;">
+        <svg viewBox="0 0 90 90" width="80" style="animation:bounce 3s ease-in-out infinite;flex-shrink:0;">
+          <!-- Body -->
+          <rect x="18" y="42" width="54" height="40" rx="10" fill="#16213E" stroke="#D62B31" stroke-width="2"/>
+          <!-- Belly screen -->
+          <rect x="24" y="50" width="42" height="24" rx="6" fill="#0f0f1a"/>
+          <text x="45" y="63" font-family="Nunito,sans-serif" font-size="8" fill="#00C896" text-anchor="middle" font-weight="800">claude</text>
+          <text x="45" y="72" font-family="Nunito,sans-serif" font-size="7" fill="#8892B0" text-anchor="middle">AI Assistant</text>
+          <!-- Antennas -->
+          <line x1="38" y1="14" x2="38" y2="26" stroke="#D62B31" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="38" cy="11" r="4" fill="#D62B31"/>
+          <line x1="52" y1="14" x2="52" y2="26" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="52" cy="11" r="4" fill="#FF6B35"/>
+          <!-- Head -->
+          <rect x="20" y="14" width="50" height="30" rx="10" fill="#16213E" stroke="#D62B31" stroke-width="2"/>
+          <!-- Eyes -->
+          <rect x="27" y="22" width="14" height="10" rx="4" fill="#4FC3F7"/>
+          <rect x="29" y="24" width="6" height="6" rx="3" fill="white"/>
+          <rect x="31" y="26" width="3" height="3" rx="1.5" fill="#333" style="animation:blink 3s infinite"/>
+          <rect x="49" y="22" width="14" height="10" rx="4" fill="#4FC3F7"/>
+          <rect x="51" y="24" width="6" height="6" rx="3" fill="white"/>
+          <rect x="53" y="26" width="3" height="3" rx="1.5" fill="#333" style="animation:blink 3s 1s infinite"/>
+          <!-- Arms -->
+          <rect x="4" y="46" width="14" height="28" rx="7" fill="#16213E" stroke="#D62B31" stroke-width="2"/>
+          <rect x="72" y="46" width="14" height="28" rx="7" fill="#16213E" stroke="#D62B31" stroke-width="2"/>
+          <!-- Legs -->
+          <rect x="26" y="80" width="14" height="10" rx="5" fill="#D62B31"/>
+          <rect x="50" y="80" width="14" height="10" rx="5" fill="#D62B31"/>
+        </svg>
+        <div>
+          <div class="slide-h2" style="animation:fadeUp 0.5s ease both;">Claude AI</div>
+          <div style="font-size:13px;color:var(--orange);font-weight:700;">Driver Assistant</div>
+          <div class="slide-p" style="font-size:12px;margin-top:4px;">80-token GPS-style replies</div>
+        </div>
+      </div>
+      <!-- Chat bubbles -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:var(--red);color:white;padding:9px 14px;border-radius:12px 12px 4px 12px;font-size:13px;font-weight:700;align-self:flex-end;animation:fadeUp 0.5s 0.1s ease both;">Customer not home, what do I do? 🤔</div>
+        <div style="background:var(--card);color:var(--light);padding:9px 14px;border-radius:12px 12px 12px 4px;font-size:13px;font-weight:600;align-self:flex-start;border:1px solid rgba(255,255,255,0.08);animation:fadeUp 0.5s 0.25s ease both;">Leave at door, photo, SMS customer. ✅</div>
+        <div style="background:var(--red);color:white;padding:9px 14px;border-radius:12px 12px 4px 12px;font-size:13px;font-weight:700;align-self:flex-end;animation:fadeUp 0.5s 0.4s ease both;">Access Block 456 Yishun? 🗺</div>
+        <div style="background:var(--card);color:var(--light);padding:9px 14px;border-radius:12px 12px 12px 4px;font-size:13px;font-weight:600;align-self:flex-start;border:1px solid rgba(255,255,255,0.08);animation:fadeUp 0.5s 0.55s ease both;">Yishun Ring Rd → Lobby B → Level 12 🎯</div>
+      </div>
+    </div>
+    <!-- Right: Voice -->
+    <div style="flex:1;background:var(--card);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <!-- Microphone cartoon -->
+        <svg viewBox="0 0 90 90" width="80" style="animation:float 3s ease-in-out infinite;flex-shrink:0;">
+          <!-- Mic body -->
+          <rect x="32" y="10" width="26" height="42" rx="13" fill="#16213E" stroke="#D62B31" stroke-width="2.5"/>
+          <!-- Mic grille lines -->
+          <line x1="36" y1="22" x2="54" y2="22" stroke="#D62B31" stroke-width="1.5" opacity="0.6"/>
+          <line x1="34" y1="29" x2="56" y2="29" stroke="#D62B31" stroke-width="1.5" opacity="0.6"/>
+          <line x1="34" y1="36" x2="56" y2="36" stroke="#D62B31" stroke-width="1.5" opacity="0.6"/>
+          <line x1="36" y1="43" x2="54" y2="43" stroke="#D62B31" stroke-width="1.5" opacity="0.6"/>
+          <!-- Stand -->
+          <path d="M22 52 Q22 72 45 72 Q68 72 68 52" stroke="#D62B31" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <line x1="45" y1="72" x2="45" y2="82" stroke="#D62B31" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="82" x2="60" y2="82" stroke="#D62B31" stroke-width="3" stroke-linecap="round"/>
+          <!-- Sound waves -->
+          <path d="M14 36 Q8 45 14 54" stroke="#00C896" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7" style="animation:fadeIn 1s 0s infinite alternate"/>
+          <path d="M7 30 Q-1 45 7 60" stroke="#00C896" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4" style="animation:fadeIn 1s 0.2s infinite alternate"/>
+          <path d="M76 36 Q82 45 76 54" stroke="#00C896" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7" style="animation:fadeIn 1s 0.4s infinite alternate"/>
+          <path d="M83 30 Q91 45 83 60" stroke="#00C896" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4" style="animation:fadeIn 1s 0.6s infinite alternate"/>
+        </svg>
+        <div>
+          <div class="slide-h2" style="animation:fadeUp 0.5s ease both;">Voice AI</div>
+          <div style="font-size:13px;color:var(--orange);font-weight:700;">Whisper STT</div>
+          <div class="slide-p" style="font-size:12px;margin-top:4px;">100% hands-free driving</div>
+        </div>
+      </div>
+      <!-- Flow steps -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:var(--panel);border-radius:8px;padding:10px 14px;border-left:4px solid var(--red);font-size:13px;color:var(--light);font-weight:700;animation:fadeUp 0.5s 0.1s ease both;">1. 🎙 &nbsp;Driver speaks into phone</div>
+        <div style="background:var(--navy);border-radius:8px;padding:10px 14px;border-left:4px solid var(--orange);font-size:13px;color:var(--light);font-weight:700;animation:fadeUp 0.5s 0.2s ease both;">2. 🔊 &nbsp;Audio captured (WebM)</div>
+        <div style="background:var(--panel);border-radius:8px;padding:10px 14px;border-left:4px solid var(--green);font-size:13px;color:var(--light);font-weight:700;animation:fadeUp 0.5s 0.3s ease both;">3. 📡 &nbsp;Whisper API transcribes</div>
+        <div style="background:var(--navy);border-radius:8px;padding:10px 14px;border-left:4px solid var(--blue);font-size:13px;color:var(--light);font-weight:700;animation:fadeUp 0.5s 0.4s ease both;">4. 🤖 &nbsp;Claude responds instantly</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);font-style:italic;font-weight:700;">Supports: 🇬🇧 EN &nbsp;·&nbsp; 🇨🇳 ZH &nbsp;·&nbsp; 🇲🇾 MS &nbsp;·&nbsp; 🇮🇳 TA</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 5 — PARCEL OCR
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s4">
+  <div class="topbar"><div class="dot"></div><div class="tag">Feature 03 — Parcel OCR</div></div>
+  <div class="sbody" style="flex-direction:column;padding:20px 32px 80px;gap:16px;">
+    <div>
+      <div class="slide-h1" style="animation:fadeUp 0.5s ease both;">Parcel Label OCR 📦</div>
+      <div class="slide-sub" style="animation:fadeUp 0.5s 0.1s ease both;">Photo → AI extracts all fields → auto-fills navigation in 2 seconds</div>
+    </div>
+    <!-- OCR flow with cartoons -->
+    <div style="display:flex;align-items:center;gap:12px;flex:1;">
+      <!-- Step 1: Camera -->
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;animation:pop 0.5s 0.1s ease both;">
+        <svg viewBox="0 0 80 70" width="80">
+          <rect x="5" y="15" width="70" height="50" rx="10" fill="#16213E" stroke="#D62B31" stroke-width="2"/>
+          <rect x="12" y="8" width="18" height="10" rx="4" fill="#16213E" stroke="#D62B31" stroke-width="2"/>
+          <circle cx="40" cy="38" r="18" fill="#0f0f1a"/>
+          <circle cx="40" cy="38" r="13" fill="#D62B31" opacity="0.3"/>
+          <circle cx="40" cy="38" r="8" fill="#D62B31"/>
+          <circle cx="44" cy="35" r="2.5" fill="rgba(255,255,255,0.5)"/>
+          <rect x="58" y="22" width="12" height="8" rx="3" fill="#FFD166"/>
+        </svg>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:14px;color:var(--white);">📸 Capture</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;">Driver photos parcel label</div>
+      </div>
+      <div style="font-size:24px;color:var(--orange);">→</div>
+      <!-- Step 2: Upload -->
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;animation:pop 0.5s 0.2s ease both;">
+        <svg viewBox="0 0 80 70" width="80">
+          <!-- Phone -->
+          <rect x="22" y="5" width="36" height="60" rx="6" fill="#16213E" stroke="#FF6B35" stroke-width="2"/>
+          <rect x="26" y="12" width="28" height="40" rx="4" fill="#0f0f1a"/>
+          <!-- Upload arrow -->
+          <line x1="40" y1="32" x2="40" y2="20" stroke="#FF6B35" stroke-width="3" stroke-linecap="round"/>
+          <path d="M33 27 L40 20 L47 27" stroke="#FF6B35" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Waves going up -->
+          <path d="M10 48 Q20 44 30 48 Q40 52 50 48 Q60 44 70 48" stroke="#FF6B35" stroke-width="2" fill="none" opacity="0.6" style="animation:fadeIn 1s 0s infinite alternate"/>
+        </svg>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:14px;color:var(--white);">🔄 Upload</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;">Image → Base64 → Backend</div>
+      </div>
+      <div style="font-size:24px;color:var(--orange);">→</div>
+      <!-- Step 3: GPT-4V -->
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;animation:pop 0.5s 0.3s ease both;">
+        <svg viewBox="0 0 80 70" width="80">
+          <!-- Robot eye/vision -->
+          <circle cx="40" cy="30" r="24" fill="#16213E" stroke="#00C896" stroke-width="2"/>
+          <circle cx="40" cy="30" r="16" fill="#0f0f1a"/>
+          <circle cx="40" cy="30" r="10" fill="#00C896" opacity="0.3"/>
+          <circle cx="40" cy="30" r="6" fill="#00C896"/>
+          <!-- Scanning lines -->
+          <line x1="16" y1="20" x2="64" y2="20" stroke="#00C896" stroke-width="1.5" opacity="0.4"/>
+          <line x1="16" y1="25" x2="64" y2="25" stroke="#00C896" stroke-width="1.5" opacity="0.6" style="animation:fadeIn 0.5s 0s infinite alternate"/>
+          <line x1="16" y1="35" x2="64" y2="35" stroke="#00C896" stroke-width="1.5" opacity="0.6" style="animation:fadeIn 0.5s 0.2s infinite alternate"/>
+          <line x1="16" y1="40" x2="64" y2="40" stroke="#00C896" stroke-width="1.5" opacity="0.4"/>
+          <!-- Corner markers -->
+          <path d="M16 16 L16 22 M16 16 L22 16" stroke="#00C896" stroke-width="2" stroke-linecap="round"/>
+          <path d="M64 16 L64 22 M64 16 L58 16" stroke="#00C896" stroke-width="2" stroke-linecap="round"/>
+          <path d="M16 44 L16 38 M16 44 L22 44" stroke="#00C896" stroke-width="2" stroke-linecap="round"/>
+          <path d="M64 44 L64 38 M64 44 L58 44" stroke="#00C896" stroke-width="2" stroke-linecap="round"/>
+          <!-- Label text extracted -->
+          <rect x="10" y="56" width="60" height="12" rx="4" fill="#00C896" opacity="0.15"/>
+          <text x="40" y="65" font-family="Nunito,sans-serif" font-size="8" font-weight="800" fill="#00C896" text-anchor="middle">GPT-4 VISION</text>
+        </svg>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:14px;color:var(--white);">🤖 GPT-4V</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;">Vision extracts all fields</div>
+      </div>
+      <div style="font-size:24px;color:var(--orange);">→</div>
+      <!-- Step 4: Navigate -->
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;animation:pop 0.5s 0.4s ease both;">
+        <svg viewBox="0 0 80 70" width="80">
+          <!-- Map -->
+          <rect x="6" y="10" width="68" height="52" rx="8" fill="#16213E" stroke="#4FC3F7" stroke-width="2"/>
+          <!-- Roads -->
+          <line x1="6" y1="36" x2="74" y2="36" stroke="#ffffff22" stroke-width="6"/>
+          <line x1="40" y1="10" x2="40" y2="62" stroke="#ffffff22" stroke-width="6"/>
+          <!-- Route -->
+          <path d="M18 55 Q28 36 40 28 Q55 22 62 16" stroke="#4FC3F7" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="5 3"/>
+          <!-- Pin drop animation -->
+          <circle cx="62" cy="16" r="9" fill="#D62B31"/>
+          <circle cx="62" cy="16" r="4" fill="white"/>
+          <!-- Arrival marker -->
+          <circle cx="18" cy="55" r="6" fill="#00C896"/>
+          <text x="18" y="58" font-size="7" fill="white" text-anchor="middle" font-weight="800">A</text>
+        </svg>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:14px;color:var(--white);">🗺 Navigate</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;">Auto-fills route planner</div>
+      </div>
+    </div>
+    <!-- JSON output -->
+    <div style="background:var(--card);border:2px solid var(--green);border-radius:10px;padding:12px 18px;">
+      <span style="font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--green);">📦 &nbsp;OCR Output → &nbsp;</span>
+      <span style="font-family:'Nunito',monospace;font-size:13px;color:var(--light);font-weight:700;">{ "name": "John Tan", "address": "Blk 204 Ang Mo Kio Ave 1", "unit": "#12-34", "postal": "560204" }</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 6 — NAVIGATION + WEATHER
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s5">
+  <div class="topbar"><div class="dot"></div><div class="tag">Feature 04 &amp; 05</div></div>
+  <div class="sbody" style="gap:20px;padding:20px 32px 80px;">
+    <!-- Left: Navigation -->
+    <div style="flex:1;background:var(--panel);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <svg viewBox="0 0 70 70" width="64" style="animation:float 3s ease-in-out infinite;flex-shrink:0;">
+          <rect x="5" y="5" width="60" height="60" rx="10" fill="#16213E" stroke="#00C896" stroke-width="2"/>
+          <line x1="5" y1="35" x2="65" y2="35" stroke="#ffffff15" stroke-width="8"/>
+          <line x1="35" y1="5" x2="35" y2="65" stroke="#ffffff15" stroke-width="8"/>
+          <path d="M14 52 Q26 35 35 26 Q46 18 56 14" stroke="#4FC3F7" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="6 3"/>
+          <circle cx="56" cy="14" r="8" fill="#D62B31"/>
+          <circle cx="56" cy="14" r="4" fill="white"/>
+          <polygon points="35,28 29,40 41,40" fill="#FFD166"/>
+        </svg>
+        <div>
+          <div class="slide-h2" style="animation:fadeUp 0.5s ease both;">Smart Navigation</div>
+          <div style="font-size:12px;color:var(--green);font-weight:700;">Singapore-Optimised Routing</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:8px 12px;border-radius:8px;"><span style="font-weight:800;color:var(--green);font-size:13px;">🗺 OneMap SG</span><span style="font-size:11px;color:var(--muted);">Primary geocoder</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--navy);padding:8px 12px;border-radius:8px;"><span style="font-weight:800;color:var(--orange);font-size:13px;">📍 Google Places</span><span style="font-size:11px;color:var(--muted);">POI search</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:8px 12px;border-radius:8px;"><span style="font-weight:800;color:var(--blue);font-size:13px;">🔀 OSRM</span><span style="font-size:11px;color:var(--muted);">Turn-by-turn routing</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--navy);padding:8px 12px;border-radius:8px;"><span style="font-weight:800;color:var(--muted);font-size:13px;">🌐 Nominatim</span><span style="font-size:11px;color:var(--muted);">Fallback geocoder</span></div>
+      </div>
+    </div>
+    <!-- Right: Weather + Notifications -->
+    <div style="flex:1;background:var(--card);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <!-- Rain cloud cartoon -->
+        <svg viewBox="0 0 70 70" width="64" style="flex-shrink:0;animation:float 2.5s 0.5s ease-in-out infinite;">
+          <!-- Cloud -->
+          <ellipse cx="35" cy="26" rx="22" ry="14" fill="#4FC3F7" opacity="0.9"/>
+          <ellipse cx="22" cy="30" rx="15" ry="10" fill="#4FC3F7" opacity="0.9"/>
+          <ellipse cx="48" cy="30" rx="14" ry="9" fill="#4FC3F7"/>
+          <rect x="8" y="28" width="54" height="12" rx="0" fill="#4FC3F7"/>
+          <!-- Dark storm base -->
+          <ellipse cx="35" cy="38" rx="25" ry="8" fill="#1a3a5c"/>
+          <rect x="10" y="34" width="50" height="10" rx="4" fill="#1a3a5c"/>
+          <!-- Rain drops -->
+          <line x1="20" y1="48" x2="17" y2="60" stroke="#4FC3F7" stroke-width="2.5" stroke-linecap="round" style="animation:rain 0.8s 0s infinite"/>
+          <line x1="32" y1="48" x2="29" y2="62" stroke="#4FC3F7" stroke-width="2.5" stroke-linecap="round" style="animation:rain 0.8s 0.15s infinite"/>
+          <line x1="44" y1="48" x2="41" y2="60" stroke="#4FC3F7" stroke-width="2.5" stroke-linecap="round" style="animation:rain 0.8s 0.3s infinite"/>
+          <line x1="54" y1="50" x2="51" y2="62" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round" style="animation:rain 0.8s 0.45s infinite"/>
+          <!-- Lightning -->
+          <path d="M36 30 L30 42 L36 42 L30 56" stroke="#FFD166" stroke-width="2.5" fill="none" stroke-linecap="round" style="animation:fadeIn 0.5s 0s infinite alternate"/>
+        </svg>
+        <div>
+          <div class="slide-h2" style="animation:fadeUp 0.5s ease both;">Weather &amp; Notify</div>
+          <div style="font-size:12px;color:var(--orange);font-weight:700;">Auto alerts + ETA messages</div>
+        </div>
+      </div>
+      <!-- Rain alert -->
+      <div style="background:rgba(255,107,53,0.1);border:2px solid var(--orange);border-radius:10px;padding:12px 14px;">
+        <div style="font-size:13px;font-weight:800;color:var(--orange);margin-bottom:4px;">⚠️ &nbsp;Heavy Rain Alert</div>
+        <div style="font-size:12px;color:var(--light);font-weight:600;line-height:1.5;">Thunderstorm near your route.<br>Shelter at Jurong East MRT (0.3km) ☂️</div>
+      </div>
+      <!-- ETA notification -->
+      <div style="background:rgba(0,200,150,0.08);border:2px solid var(--green);border-radius:10px;padding:12px 14px;">
+        <div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:4px;">🔔 &nbsp;Auto ETA Generated</div>
+        <div style="font-size:12px;color:var(--light);font-style:italic;font-weight:600;line-height:1.5;">"Hi! Your Ninja Van parcel arrives in ~15 min. [Copy to WhatsApp]" 📱</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 7 — ARCHITECTURE
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="topbar"><div class="dot"></div><div class="tag">Architecture</div></div>
+  <div class="sbody" style="gap:20px;padding:20px 32px 80px;align-items:center;">
+    <!-- Cartoon building blocks architecture -->
+    <svg viewBox="0 0 200 280" width="180" style="flex-shrink:0;animation:pop 0.7s ease both;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.5));">
+      <!-- Layer 4: Cloud -->
+      <rect x="10" y="220" width="180" height="50" rx="10" fill="#1a2040" stroke="#4FC3F7" stroke-width="2"/>
+      <text x="100" y="240" font-family="Fredoka One,sans-serif" font-size="10" fill="#4FC3F7" text-anchor="middle">☁️ Google Cloud Run</text>
+      <text x="100" y="258" font-family="Nunito,sans-serif" font-size="8" fill="#8892B0" text-anchor="middle" font-weight="700">Docker · GitHub Actions · CI/CD</text>
+      <!-- Arrow up -->
+      <line x1="100" y1="215" x2="100" y2="205" stroke="#8892B0" stroke-width="2" stroke-dasharray="3 2"/>
+      <polygon points="95,207 100,198 105,207" fill="#8892B0"/>
+      <!-- Layer 3: AI APIs -->
+      <rect x="10" y="148" width="180" height="50" rx="10" fill="#1a1400" stroke="#FF6B35" stroke-width="2"/>
+      <text x="100" y="168" font-family="Fredoka One,sans-serif" font-size="10" fill="#FF6B35" text-anchor="middle">🤖 AI &amp; External APIs</text>
+      <text x="100" y="184" font-family="Nunito,sans-serif" font-size="7" fill="#8892B0" text-anchor="middle" font-weight="700">Claude · GPT-4V · Whisper · OneMap · OSRM</text>
+      <!-- Arrow up -->
+      <line x1="100" y1="143" x2="100" y2="133" stroke="#8892B0" stroke-width="2" stroke-dasharray="3 2"/>
+      <polygon points="95,135 100,126 105,135" fill="#8892B0"/>
+      <!-- Layer 2: Flask -->
+      <rect x="10" y="76" width="180" height="50" rx="10" fill="#001a08" stroke="#00C896" stroke-width="2"/>
+      <text x="100" y="96" font-family="Fredoka One,sans-serif" font-size="10" fill="#00C896" text-anchor="middle">⚙️ Flask Backend (Python)</text>
+      <text x="100" y="112" font-family="Nunito,sans-serif" font-size="7" fill="#8892B0" text-anchor="middle" font-weight="700">/chat · /scan · /transcribe · /route · /weather</text>
+      <!-- Arrow up -->
+      <line x1="100" y1="71" x2="100" y2="61" stroke="#8892B0" stroke-width="2" stroke-dasharray="3 2"/>
+      <polygon points="95,63 100,54 105,63" fill="#8892B0"/>
+      <!-- Layer 1: Frontend -->
+      <rect x="10" y="4" width="180" height="50" rx="10" fill="#1a0008" stroke="#D62B31" stroke-width="2"/>
+      <text x="100" y="24" font-family="Fredoka One,sans-serif" font-size="10" fill="#D62B31" text-anchor="middle">📱 Mobile Web Frontend</text>
+      <text x="100" y="40" font-family="Nunito,sans-serif" font-size="7" fill="#8892B0" text-anchor="middle" font-weight="700">HTML5 · CSS3 · Vanilla JS · Camera · Mic</text>
+      <!-- Badges -->
+      <rect x="14" y="46" width="34" height="10" rx="4" fill="#D62B31" opacity="0.8"/>
+      <text x="31" y="54" font-family="Nunito,sans-serif" font-size="6.5" fill="white" text-anchor="middle" font-weight="800">FRONTEND</text>
+      <rect x="14" y="118" width="30" height="10" rx="4" fill="#00C896" opacity="0.8"/>
+      <text x="29" y="126" font-family="Nunito,sans-serif" font-size="6.5" fill="white" text-anchor="middle" font-weight="800">BACKEND</text>
+    </svg>
+    <!-- Labels on right -->
+    <div style="flex:1;display:flex;flex-direction:column;gap:12px;justify-content:center;">
+      <div class="slide-h1" style="animation:fadeUp 0.5s ease both;">System Architecture</div>
+      <div class="slide-sub" style="animation:fadeUp 0.5s 0.1s ease both;">Clean 4-layer design 🏗️</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(214,43,49,0.08);border-left:4px solid var(--red);padding:10px 14px;border-radius:0 8px 8px 0;animation:fadeUp 0.5s 0.1s ease both;">
+          <span style="font-size:20px;">📱</span><div><div style="font-weight:800;color:var(--white);font-size:14px;">Mobile Web Frontend</div><div style="font-size:12px;color:var(--muted);">Single HTML file, no install needed</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(0,200,150,0.08);border-left:4px solid var(--green);padding:10px 14px;border-radius:0 8px 8px 0;animation:fadeUp 0.5s 0.2s ease both;">
+          <span style="font-size:20px;">⚙️</span><div><div style="font-weight:800;color:var(--white);font-size:14px;">Flask Backend</div><div style="font-size:12px;color:var(--muted);">7 REST API endpoints</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,107,53,0.08);border-left:4px solid var(--orange);padding:10px 14px;border-radius:0 8px 8px 0;animation:fadeUp 0.5s 0.3s ease both;">
+          <span style="font-size:20px;">🤖</span><div><div style="font-weight:800;color:var(--white);font-size:14px;">AI &amp; External APIs</div><div style="font-size:12px;color:var(--muted);">Claude, GPT-4V, Whisper, OneMap…</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(79,195,247,0.08);border-left:4px solid var(--blue);padding:10px 14px;border-radius:0 8px 8px 0;animation:fadeUp 0.5s 0.4s ease both;">
+          <span style="font-size:20px;">☁️</span><div><div style="font-weight:800;color:var(--white);font-size:14px;">Google Cloud Run</div><div style="font-size:12px;color:var(--muted);">Docker container, serverless scaling</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 8 — TECH STACK
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s7">
+  <div class="topbar"><div class="dot"></div><div class="tag">Tech Stack</div></div>
+  <div class="sbody" style="flex-direction:column;padding:20px 32px 80px;gap:12px;">
+    <div>
+      <div class="slide-h1" style="animation:fadeUp 0.5s ease both;">Built With 🛠️</div>
+      <div class="slide-sub" style="animation:fadeUp 0.5s 0.1s ease both;">Purpose-chosen tools for production AI delivery</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;flex:1;justify-content:center;">
+      <div style="display:flex;align-items:center;gap:10px;animation:fadeUp 0.5s 0.1s ease both;">
+        <div style="width:100px;background:var(--panel);border-radius:8px;padding:8px;text-align:center;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;flex-shrink:0;">AI / LLMs</div>
+        <div style="display:flex;gap:8px;flex:1;">
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--red);"><div style="font-weight:800;color:var(--white);font-size:13px;">Anthropic Claude</div><div style="font-size:11px;color:var(--muted);">claude-sonnet-4-5</div></div>
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--green);"><div style="font-weight:800;color:var(--white);font-size:13px;">OpenAI GPT-4V</div><div style="font-size:11px;color:var(--muted);">Vision / OCR</div></div>
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--orange);"><div style="font-weight:800;color:var(--white);font-size:13px;">Whisper STT</div><div style="font-size:11px;color:var(--muted);">Speech recognition</div></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;animation:fadeUp 0.5s 0.2s ease both;">
+        <div style="width:100px;background:var(--panel);border-radius:8px;padding:8px;text-align:center;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;flex-shrink:0;">Backend</div>
+        <div style="display:flex;gap:8px;flex:1;">
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--blue);"><div style="font-weight:800;color:var(--white);font-size:13px;">Python Flask</div><div style="font-size:11px;color:var(--muted);">REST API server</div></div>
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--green);"><div style="font-weight:800;color:var(--white);font-size:13px;">Gunicorn</div><div style="font-size:11px;color:var(--muted);">WSGI server</div></div>
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--muted);"><div style="font-weight:800;color:var(--white);font-size:13px;">Requests</div><div style="font-size:11px;color:var(--muted);">HTTP client</div></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;animation:fadeUp 0.5s 0.3s ease both;">
+        <div style="width:100px;background:var(--panel);border-radius:8px;padding:8px;text-align:center;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;flex-shrink:0;">Maps</div>
+        <div style="display:flex;gap:8px;flex:1;">
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--orange);"><div style="font-weight:800;color:var(--white);font-size:13px;">OneMap SG</div><div style="font-size:11px;color:var(--muted);">Geocoding</div></div>
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--red);"><div style="font-weight:800;color:var(--white);font-size:13px;">Google Places</div><div style="font-size:11px;color:var(--muted);">POI search</div></div>
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--green);"><div style="font-weight:800;color:var(--white);font-size:13px;">OSRM</div><div style="font-size:11px;color:var(--muted);">Open routing</div></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;animation:fadeUp 0.5s 0.4s ease both;">
+        <div style="width:100px;background:var(--panel);border-radius:8px;padding:8px;text-align:center;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;flex-shrink:0;">DevOps</div>
+        <div style="display:flex;gap:8px;flex:1;">
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--blue);"><div style="font-weight:800;color:var(--white);font-size:13px;">Docker</div><div style="font-size:11px;color:var(--muted);">Containerisation</div></div>
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--red);"><div style="font-weight:800;color:var(--white);font-size:13px;">Cloud Run</div><div style="font-size:11px;color:var(--muted);">Serverless GCP</div></div>
+          <div style="flex:1;background:var(--card);border-radius:8px;padding:10px 14px;border-left:4px solid var(--green);"><div style="font-weight:800;color:var(--white);font-size:13px;">GitHub Actions</div><div style="font-size:11px;color:var(--muted);">CI/CD pipeline</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 9 — HIGHLIGHTS
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s8">
+  <div class="topbar"><div class="dot"></div><div class="tag">What We Built</div></div>
+  <div class="sbody" style="flex-direction:column;padding:20px 32px 80px;gap:14px;">
+    <div>
+      <div class="slide-h1" style="animation:fadeUp 0.5s ease both;">Highlights 🏆</div>
+      <div class="slide-sub" style="animation:fadeUp 0.5s 0.1s ease both;">Production-ready, deployed, and live</div>
+    </div>
+    <!-- 3 big stats -->
+    <div style="display:flex;gap:14px;">
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:18px;text-align:center;border-top:4px solid var(--red);animation:pop 0.5s 0.1s ease both;">
+        <div class="stat-big" style="color:var(--red);">6</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:16px;color:var(--white);margin-top:4px;">AI Features</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">Voice · OCR · Nav · Weather · Notify · Chat</div>
+      </div>
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:18px;text-align:center;border-top:4px solid var(--green);animation:pop 0.5s 0.2s ease both;">
+        <div class="stat-big" style="color:var(--green);">7</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:16px;color:var(--white);margin-top:4px;">API Endpoints</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">/chat /scan /transcribe /route /weather…</div>
+      </div>
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:18px;text-align:center;border-top:4px solid var(--orange);animation:pop 0.5s 0.3s ease both;">
+        <div class="stat-big" style="color:var(--orange);">3</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:16px;color:var(--white);margin-top:4px;">AI Models</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">Claude · GPT-4V · Whisper</div>
+      </div>
+    </div>
+    <!-- Checklist -->
+    <div style="display:flex;flex-direction:column;gap:6px;flex:1;justify-content:center;">
+      <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--light);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);animation:fadeUp 0.4s 0.1s ease both;"><span style="font-size:18px;">✅</span> Single-file Flask app — API + frontend in one Docker image</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--light);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);animation:fadeUp 0.4s 0.2s ease both;"><span style="font-size:18px;">✅</span> Multi-provider AI — switch Claude/OpenAI via env variable</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--light);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);animation:fadeUp 0.4s 0.3s ease both;"><span style="font-size:18px;">✅</span> Dual geocoding with graceful fallback (OneMap → Nominatim)</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--light);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);animation:fadeUp 0.4s 0.4s ease both;"><span style="font-size:18px;">✅</span> GitHub Actions CI/CD — push to main triggers auto-deploy</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--light);padding:8px 0;animation:fadeUp 0.4s 0.5s ease both;"><span style="font-size:18px;">✅</span> Mobile-first responsive UI — works on any smartphone browser</div>
+    </div>
+  </div>
+  <div class="btmbar">🚀 Deployed &amp; Live on Google Cloud Run · Available for live demo</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 10 — FUTURE VISION
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s9">
+  <div class="topbar"><div class="dot"></div><div class="tag">Future Vision</div></div>
+  <div class="sbody" style="flex-direction:column;padding:20px 32px 80px;gap:14px;">
+    <div>
+      <div class="slide-h1" style="animation:fadeUp 0.5s ease both;">From Copilot → Control Tower 🚀</div>
+      <div class="slide-sub" style="animation:fadeUp 0.5s 0.1s ease both;">3 phases from driver assistant to enterprise AI platform</div>
+    </div>
+    <div style="display:flex;gap:12px;flex:1;align-items:stretch;">
+      <!-- Phase 1 -->
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--red);animation:pop 0.5s 0.1s ease both;">
+        <div style="text-align:center;margin-bottom:4px;">
+          <svg viewBox="0 0 60 60" width="56" style="margin:0 auto;display:block;">
+            <circle cx="30" cy="30" r="26" fill="rgba(214,43,49,0.15)" stroke="var(--red)" stroke-width="2"/>
+            <text x="30" y="38" font-size="28" text-anchor="middle">📱</text>
+          </svg>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:var(--red);letter-spacing:2px;text-transform:uppercase;text-align:center;">Phase 1 — Now</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:20px;color:var(--white);text-align:center;">Driver Copilot</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--red);padding-left:10px;font-weight:700;">› Voice + OCR</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--red);padding-left:10px;font-weight:700;">› Navigation</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--red);padding-left:10px;font-weight:700;">› Weather + Notify</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--red);padding-left:10px;font-weight:700;">› Claude AI Chat</div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:28px;color:var(--orange);animation:wiggle 2s infinite;">→</div>
+      <!-- Phase 2 -->
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--orange);animation:pop 0.5s 0.2s ease both;">
+        <div style="text-align:center;margin-bottom:4px;">
+          <svg viewBox="0 0 60 60" width="56" style="margin:0 auto;display:block;">
+            <circle cx="30" cy="30" r="26" fill="rgba(255,107,53,0.15)" stroke="var(--orange)" stroke-width="2"/>
+            <text x="30" y="38" font-size="28" text-anchor="middle">🚛</text>
+          </svg>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:var(--orange);letter-spacing:2px;text-transform:uppercase;text-align:center;">Phase 2 — 6 Months</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:20px;color:var(--white);text-align:center;">Fleet Intelligence</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--orange);padding-left:10px;font-weight:700;">› Multi-driver view</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--orange);padding-left:10px;font-weight:700;">› Route optimisation</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--orange);padding-left:10px;font-weight:700;">› Anomaly detection</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--orange);padding-left:10px;font-weight:700;">› Predictive ETAs</div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:28px;color:var(--orange);animation:wiggle 2s 0.5s infinite;">→</div>
+      <!-- Phase 3 -->
+      <div style="flex:1;background:var(--card);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--green);animation:pop 0.5s 0.3s ease both;">
+        <div style="text-align:center;margin-bottom:4px;">
+          <svg viewBox="0 0 60 60" width="56" style="margin:0 auto;display:block;animation:float 3s ease-in-out infinite;">
+            <circle cx="30" cy="30" r="26" fill="rgba(0,200,150,0.15)" stroke="var(--green)" stroke-width="2"/>
+            <text x="30" y="38" font-size="28" text-anchor="middle">🏢</text>
+          </svg>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:var(--green);letter-spacing:2px;text-transform:uppercase;text-align:center;">Phase 3 — 12 Months</div>
+        <div style="font-family:'Fredoka One',sans-serif;font-size:20px;color:var(--white);text-align:center;">Control Tower</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--green);padding-left:10px;font-weight:700;">› Demand forecasting</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--green);padding-left:10px;font-weight:700;">› Warehouse agents</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--green);padding-left:10px;font-weight:700;">› Customer support AI</div>
+        <div style="font-size:12px;color:var(--muted);border-left:3px solid var(--green);padding-left:10px;font-weight:700;">› Pricing optimisation</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);font-style:italic;font-weight:700;text-align:center;">🎯 The driver copilot is the data-collection foundation that makes everything else possible.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 11 — THANK YOU
+═══════════════════════════════════════════════════════════ -->
+<div class="slide" id="s10">
+  <div class="sbody" style="flex-direction:row;">
+    <!-- Left panel -->
+    <div style="width:42%;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;position:relative;overflow:hidden;">
+      <div style="position:absolute;right:0;top:0;bottom:0;width:14px;background:var(--orange);"></div>
+      <!-- Celebration truck -->
+      <svg viewBox="0 0 240 160" width="85%" style="animation:bounce 2s ease-in-out infinite;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.4))">
+        <!-- Confetti -->
+        <rect x="15" y="10" width="8" height="8" rx="2" fill="#FFD166" transform="rotate(30 15 10)" style="animation:celebrate 1.5s 0s infinite"/>
+        <rect x="190" y="15" width="8" height="8" rx="2" fill="#4FC3F7" transform="rotate(-20 190 15)" style="animation:celebrate 1.5s 0.3s infinite"/>
+        <rect x="210" y="40" width="6" height="6" rx="1" fill="#00C896" transform="rotate(45 210 40)" style="animation:celebrate 1.5s 0.6s infinite"/>
+        <rect x="25" y="55" width="6" height="6" rx="1" fill="#fff" transform="rotate(15 25 55)" style="animation:celebrate 1.5s 0.2s infinite"/>
+        <circle cx="175" cy="60" r="4" fill="#FFD166" style="animation:celebrate 1.5s 0.8s infinite"/>
+        <circle cx="40" cy="80" r="3" fill="#4FC3F7" style="animation:celebrate 1.5s 0.4s infinite"/>
+        <!-- Stars -->
+        <text x="20" y="45" font-size="16">⭐</text>
+        <text x="195" y="72" font-size="14">✨</text>
+        <text x="105" y="18" font-size="18" style="animation:wiggle 1s infinite">🎉</text>
+        <!-- Truck -->
+        <rect x="18" y="66" width="160" height="70" rx="10" fill="#fff"/>
+        <rect x="18" y="66" width="160" height="14" rx="6" fill="#D62B31"/>
+        <rect x="148" y="42" width="55" height="52" rx="10" fill="#fff"/>
+        <rect x="148" y="42" width="55" height="14" rx="6" fill="#D62B31"/>
+        <rect x="153" y="58" width="43" height="24" rx="6" fill="#4FC3F7" opacity="0.9"/>
+        <rect x="28" y="84" width="120" height="34" rx="6" fill="#D62B31"/>
+        <text x="88" y="106" font-family="Fredoka One,sans-serif" font-size="16" fill="white" text-anchor="middle">NINJA VAN</text>
+        <circle cx="55" cy="136" r="16" fill="#333"/><circle cx="55" cy="136" r="9" fill="#666"/><circle cx="55" cy="136" r="4" fill="#999"/>
+        <circle cx="175" cy="136" r="16" fill="#333"/><circle cx="175" cy="136" r="9" fill="#666"/><circle cx="175" cy="136" r="4" fill="#999"/>
+        <!-- Ninja -->
+        <circle cx="172" cy="54" r="10" fill="#FFD166"/>
+        <rect x="164" y="54" width="16" height="6" rx="3" fill="#1a1a2e"/>
+        <circle cx="169" cy="53" r="2" fill="white"/><circle cx="175" cy="53" r="2" fill="white"/>
+        <rect x="165" y="46" width="14" height="4" rx="2" fill="#D62B31"/>
+      </svg>
+      <div style="font-family:'Fredoka One',sans-serif;font-size:13px;letter-spacing:5px;color:rgba(255,255,255,0.9);margin-top:14px;">CAPSTONE 2025</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.7);font-style:italic;margin-top:8px;text-align:center;">AI · Logistics · Innovation</div>
+    </div>
+    <!-- Right panel -->
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 48px 80px;gap:16px;">
+      <div style="font-family:'Fredoka One',sans-serif;font-size:clamp(44px,7vw,78px);color:var(--white);line-height:1;animation:pop 0.7s ease both;">Thank You! 🙌</div>
+      <div class="slide-sub" style="font-size:22px;animation:fadeUp 0.7s 0.2s ease both;">Questions &amp; Discussion</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;animation:fadeUp 0.7s 0.4s ease both;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--light);"><div style="width:30px;height:30px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🎙</div>Voice AI</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--light);"><div style="width:30px;height:30px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🌧</div>Weather &amp; Notify</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--light);"><div style="width:30px;height:30px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">📦</div>Parcel OCR</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--light);"><div style="width:30px;height:30px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🤖</div>Claude AI Chat</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--light);"><div style="width:30px;height:30px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🗺</div>Navigation</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--light);"><div style="width:30px;height:30px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">☁️</div>GCP + CI/CD</div>
+      </div>
+      <div style="background:var(--panel);border-radius:8px;padding:10px 16px;font-size:11px;color:var(--muted);text-align:center;font-weight:700;animation:fadeUp 0.7s 0.6s ease both;">github.com/ninja-copilot &nbsp;·&nbsp; Deployed on Google Cloud Run</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #stage -->
+
+<!-- ── Controls ── -->
+<div id="controls">
+  <button class="ctrl-btn primary" id="btn-speak" onclick="startPresentation()">🔊 Play with Sound</button>
+  <button class="ctrl-btn" onclick="stopSpeech()" id="btn-stop" style="display:none;">⏹ Stop</button>
+  <button class="ctrl-btn" onclick="togglePause()" id="btn-pause" style="display:none;">⏸ Pause</button>
+  <div id="progress-wrap">
+    <div id="progress-bar" onclick="seekSlide(event)"><div id="progress-fill"></div></div>
+  </div>
+  <div id="slide-num">1 / 11</div>
+  <button class="ctrl-btn" onclick="changeSlide(-1)">◀</button>
+  <button class="ctrl-btn" onclick="changeSlide(1)">▶</button>
+  <div id="timer">0:00</div>
+</div>
+
+<!-- ── Subtitles ── -->
+<div id="subtitles">
+  <div id="speech-wave"><span></span><span></span><span></span><span></span><span></span></div>
+  <span id="sub-text">Click 🔊 Play with Sound to start the full narrated video presentation</span>
+</div>
+
+<script>
+const TOTAL = 11;
+let current = 0;
+let speaking = false;
+let paused = false;
+let elapsed = 0;
+let timerInterval = null;
+let currentUtterance = null;
+
+// Full narration scripts per slide
+const narration = [
+  // Slide 1 - Title
+  `Good morning everyone, and welcome. Today we're presenting our capstone project — the Ninja Co-Pilot. We built an AI-powered delivery assistant for Ninja Van drivers right here in Singapore. It brings together Generative AI, Computer Vision, and Voice AI to transform last-mile delivery. The app is deployed live on Google Cloud Run with full continuous deployment via GitHub Actions. Let's dive in.`,
+
+  // Slide 2 - Challenge
+  `Let's start with the problem. Last-mile delivery in Singapore is genuinely hard. Drivers deal with four major pain points every single shift. First, manual navigation — drivers spend about 30 percent of their time just searching for HDB addresses. Second, there's no hands-free help — you can't safely look things up while driving. Third, manual parcel scanning means typing addresses by hand, which causes 15 percent of deliveries to fail. And fourth, poor customer communication leaves customers wondering where their parcels are. With over 2 million parcels delivered daily in Singapore, fixing these problems at scale has huge impact.`,
+
+  // Slide 3 - Solution
+  `This is where Ninja Co-Pilot comes in. It's a mobile-first AI companion that supports drivers at every step of their shift. We built six core features. Voice AI for hands-free operation. Parcel OCR that scans labels and fills in addresses automatically. Singapore-optimised navigation. Real-time weather alerts. Automated ETA notifications. And Claude AI chat for instant delivery guidance. It runs as a mobile web app — no install required. Any driver can access it via a URL on their phone.`,
+
+  // Slide 4 - Claude + Voice
+  `Let me go deeper on the first two features. Claude AI is the brain of the app. Drivers ask questions in plain language and get GPS-style short answers. If a customer isn't home — the AI says: leave at door, take a photo, SMS the customer. Need to know how to access a block? The AI gives you the exact entry route. We deliberately cap responses at 80 tokens — short and actionable only. On the right, Voice AI via OpenAI Whisper. Drivers tap record, speak, and the system transcribes and responds — completely hands-free. We support English, Mandarin, Malay, and Tamil.`,
+
+  // Slide 5 - OCR
+  `Feature three is Parcel Label OCR. The old process took 45 seconds of manual typing. Our solution takes under 2 seconds. Here's how it works. The driver photographs the parcel label. The image is encoded and sent to our backend. GPT-4 Vision reads the label and extracts all fields — name, address, unit number, postal code. And that data auto-fills the navigation destination. You can see a real example at the bottom: John Tan, Block 204 Ang Mo Kio Avenue 1, unit 12-34, postal code 560204 — all from a single photo.`,
+
+  // Slide 6 - Nav + Weather
+  `Features four and five: Navigation and Weather. For navigation, we built a layered stack tailored for Singapore. OneMap Singapore is our primary geocoder — it handles HDB blocks perfectly. Google Places covers point-of-interest searches. OSRM handles turn-by-turn routing with full GeoJSON output. And if any API fails, we fall back gracefully to Nominatim. The system always stays functional. On the weather side, we detect rain in real-time and fire alerts with shelter suggestions. And for customer notifications, we generate ready-to-send ETA messages — drivers just copy to WhatsApp in one tap.`,
+
+  // Slide 7 - Architecture
+  `Here's how everything fits together — four clean layers. At the top, a mobile web frontend built in plain HTML, CSS, and vanilla JavaScript. No frameworks, no build process. Below that, a Python Flask backend exposing seven REST endpoints covering every feature. Then the AI and external API layer: Claude, GPT-4V, Whisper, OneMap, Google Places, WeatherAPI, and OSRM. At the base, Google Cloud Run running our Docker container with automatic scaling. One important design choice: we built this as a single Flask file that serves both the API and the frontend. One image, zero complexity.`,
+
+  // Slide 8 - Tech Stack
+  `Here's the full tech stack. For AI, we use Anthropic Claude for the chat assistant, GPT-4 Vision for OCR, and OpenAI Whisper for speech recognition. The backend is Python Flask with Gunicorn as the production server. Maps use OneMap Singapore as primary, Google Places for POI, and OSRM for routing. And for DevOps, Docker handles containerisation, Google Cloud Run does serverless hosting, and GitHub Actions manages the full CI-CD pipeline. Every push to main automatically builds, tests, and deploys. The entire cycle takes under three minutes.`,
+
+  // Slide 9 - Highlights
+  `Let me summarise what we actually built. Six AI-powered features. Seven API endpoints. Three AI models integrated. All deployed live on Google Cloud Run. The app is a single file — one Flask app, one Docker image. The AI provider is switchable via environment variable — Claude or OpenAI, no code change needed. Geocoding uses dual providers with graceful fallback. The UI is fully responsive and mobile-first. And the GitHub Actions pipeline means any team member can deploy by just pushing to main.`,
+
+  // Slide 10 - Future
+  `So where does this go? Today we have Phase One — the Driver Copilot. A personal AI assistant for one driver. In six months, Phase Two becomes Fleet Intelligence — a multi-driver dashboard, ML route optimisation, anomaly detection, and predictive ETAs. At twelve months, Phase Three is the full AI Logistics Control Tower — demand forecasting, warehouse agents, customer support AI, and pricing optimisation. The key insight is this: every delivery generates data. The copilot is the data-collection layer that makes the entire platform possible. We're building from the ground up, driver first.`,
+
+  // Slide 11 - Thank You
+  `And that brings us to the end. Ninja Co-Pilot is a fully deployed, production-ready AI assistant solving real delivery pain points. Voice AI, Parcel OCR, Singapore-optimised Navigation, Weather Alerts, Automated Notifications, and Claude AI guidance. The code is live on Google Cloud Run and the GitHub repository is open for review. Thank you so much for your time. We're now happy to take any questions.`,
+];
+
+// ── Slide control ──
+function getSlides() { return document.querySelectorAll('.slide'); }
+
+function showSlide(i, scroll=false) {
+  getSlides().forEach((s,idx) => s.classList.toggle('active', idx===i));
+  current = i;
+  document.getElementById('slide-num').textContent = `${i+1} / ${TOTAL}`;
+  document.getElementById('progress-fill').style.width = `${(i/(TOTAL-1))*100}%`;
+}
+
+function changeSlide(dir) {
+  stopSpeech();
+  showSlide(Math.max(0, Math.min(TOTAL-1, current+dir)));
+}
+
+function seekSlide(e) {
+  const bar = document.getElementById('progress-bar');
+  const pct = (e.clientX - bar.getBoundingClientRect().left) / bar.offsetWidth;
+  const idx = Math.round(pct * (TOTAL-1));
+  stopSpeech();
+  showSlide(Math.max(0, Math.min(TOTAL-1, idx)));
+}
+
+// ── Speech ──
+function startPresentation() {
+  if (!window.speechSynthesis) {
+    alert('Your browser does not support speech synthesis. Please use Chrome or Edge.');
+    return;
+  }
+  stopSpeech();
+  speaking = true;
+  paused = false;
+  document.getElementById('btn-speak').style.display = 'none';
+  document.getElementById('btn-stop').style.display = 'inline-block';
+  document.getElementById('btn-pause').style.display = 'inline-block';
+  document.getElementById('speech-wave').classList.add('active');
+  if (!timerInterval) startTimer();
+  speakSlide(current);
+}
+
+function speakSlide(idx) {
+  if (!speaking || idx >= TOTAL) {
+    if (idx >= TOTAL) finishPresentation();
+    return;
+  }
+  showSlide(idx);
+  const text = narration[idx];
+  setSubtitle(text);
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.92;
+  utter.pitch = 1.02;
+  utter.volume = 1;
+
+  // Pick a clear voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v =>
+    v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('Alex'))
+  ) || voices.find(v => v.lang.startsWith('en'));
+  if (preferred) utter.voice = preferred;
+
+  utter.onstart = () => {
+    document.getElementById('btn-speak').classList.remove('primary');
+    document.getElementById('btn-speak').classList.add('speaking');
+    document.getElementById('btn-speak').textContent = '🔊 Speaking...';
+  };
+
+  utter.onend = () => {
+    if (speaking && !paused) {
+      setTimeout(() => speakSlide(idx + 1), 600);
+    }
+  };
+
+  utter.onerror = (e) => {
+    if (e.error !== 'interrupted') console.warn('Speech error:', e.error);
+  };
+
+  currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function stopSpeech() {
+  speaking = false;
+  paused = false;
+  window.speechSynthesis.cancel();
+  currentUtterance = null;
+  document.getElementById('btn-speak').style.display = 'inline-block';
+  document.getElementById('btn-speak').textContent = '🔊 Play with Sound';
+  document.getElementById('btn-speak').className = 'ctrl-btn primary';
+  document.getElementById('btn-stop').style.display = 'none';
+  document.getElementById('btn-pause').style.display = 'none';
+  document.getElementById('speech-wave').classList.remove('active');
+}
+
+function togglePause() {
+  const btn = document.getElementById('btn-pause');
+  if (paused) {
+    paused = false;
+    btn.textContent = '⏸ Pause';
+    window.speechSynthesis.resume();
+  } else {
+    paused = true;
+    btn.textContent = '▶ Resume';
+    window.speechSynthesis.pause();
+  }
+}
+
+function finishPresentation() {
+  stopSpeech();
+  setSubtitle('Presentation complete! Thank you. 🎉');
+}
+
+function setSubtitle(text) {
+  const el = document.getElementById('sub-text');
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = text; el.style.opacity = '1'; }, 200);
+}
+
+// ── Timer ──
+function startTimer() {
+  timerInterval = setInterval(() => {
+    elapsed++;
+    const m = Math.floor(elapsed/60), s = elapsed%60;
+    document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); changeSlide(1); }
+  if (e.key==='ArrowLeft') { e.preventDefault(); changeSlide(-1); }
+  if (e.key==='p'||e.key==='P') togglePause();
+  if (e.key==='Escape') stopSpeech();
+  if (e.key==='Enter') startPresentation();
+});
+
+// Load voices
+window.speechSynthesis.onvoiceschanged = () => {};
+showSlide(0);
+</script>
+</body>
+</html>
